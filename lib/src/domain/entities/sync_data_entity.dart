@@ -20,9 +20,9 @@ class SyncDataEntity {
       );
 
   Map<String, dynamic> toJson() => {
-        "path": path,
-        "data": data,
-        "method": method,
-        "queryParameters": queryParameters,
+        'path': path,
+        'data': data,
+        'method': method,
+        'queryParameters': queryParameters,
       };
 }

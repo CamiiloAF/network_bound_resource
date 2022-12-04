@@ -1,10 +1,7 @@
-// To parse this JSON data, do
-//
-//     final postEntity = postEntityFromJson(jsonString);
-
 import 'dart:convert';
 
 List<PostEntity> postEntityFromJson(List<dynamic> data) =>
+    // ignore: unnecessary_lambdas
     List<PostEntity>.from(data.map((x) => PostEntity.fromJson(x)));
 
 String postEntityToJson(List<PostEntity> data) =>
@@ -24,16 +21,16 @@ class PostEntity {
   final String body;
 
   factory PostEntity.fromJson(Map<String, dynamic> json) => PostEntity(
-        userId: json["userId"],
-        id: json["id"],
-        title: json["title"],
-        body: json["body"],
+        userId: json['userId'],
+        id: json['id'],
+        title: json['title'],
+        body: json['body'],
       );
 
   Map<String, dynamic> toJson() => {
-        "userId": userId,
-        "id": id,
-        "title": title,
-        "body": body,
+        'userId': userId,
+        'id': id,
+        'title': title,
+        'body': body,
       };
 }

@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_annotating_with_dynamic
+
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 
@@ -9,7 +11,7 @@ import 'http_proxy_impl.dart';
 /// This class automatically decides where it should get the data from,
 /// if you have internet connection the data will be loaded from your backend,
 /// otherwise the data will be loaded from local storage or saved to it if the
-/// request is a POST  PUT or DELETE.
+/// request is a POST, PUT or DELETE.
 ///
 /// You have to loaded the information at least one time.
 abstract class NetworkBoundResourceBase {
@@ -50,7 +52,7 @@ abstract class NetworkBoundResourceBase {
     final isThereConnection = await _connectivityService.isThereConnection();
 
     if (!isThereConnection) {
-      return await _getDataFromLocal(tableName, path);
+      return _getDataFromLocal(tableName, path);
     }
 
     final response = await _httpProxyImpl.instance().get(
@@ -61,22 +63,19 @@ abstract class NetworkBoundResourceBase {
           queryParameters: queryParameters,
         );
 
-    _dataBaseHandler.clearTable(tableName);
+    await _dataBaseHandler.clearTable(tableName);
 
     if (response.data is Iterable) {
-      for (var element in response.data) {
-        _dataBaseHandler.saveLocalData(element, tableName);
+      for (final element in response.data) {
+        await _dataBaseHandler.saveLocalData(element, tableName);
       }
     } else {
-      _dataBaseHandler.saveLocalData(response.data, tableName);
+      await _dataBaseHandler.saveLocalData(response.data, tableName);
     }
     return response;
   }
 
   /// Make a POST request
-  ///
-  /// [tableName] is the name of table where the data will be stored if there
-  /// is no internet connection to be synchronized later
   Future<Response<dynamic>> executePost({
     required String path,
     dynamic data,
@@ -89,7 +88,7 @@ abstract class NetworkBoundResourceBase {
     final isThereConnection = await _connectivityService.isThereConnection();
 
     if (!isThereConnection) {
-      _onNoConnection(data, path, HttpMethod.post.name);
+      return _onNoConnection(data, path, HttpMethod.post.name);
     }
 
     final response = await _httpProxyImpl.instance().post(
@@ -106,9 +105,6 @@ abstract class NetworkBoundResourceBase {
   }
 
   /// Make a PUT request
-  ///
-  /// [tableName] is the name of table where the data will be stored if there
-  /// is no internet connection to be synchronized later
   Future<Response<dynamic>> executePut({
     required String path,
     dynamic data,
@@ -121,7 +117,7 @@ abstract class NetworkBoundResourceBase {
     final isThereConnection = await _connectivityService.isThereConnection();
 
     if (!isThereConnection) {
-      return await _onNoConnection(data, path, HttpMethod.put.name);
+      return _onNoConnection(data, path, HttpMethod.put.name);
     }
 
     final response = await _httpProxyImpl.instance().put(
@@ -138,9 +134,6 @@ abstract class NetworkBoundResourceBase {
   }
 
   /// Make a DELETE request
-  ///
-  /// [tableName] is the name of table where the data will be stored if there
-  /// is no internet connection to be synchronized later
   Future<Response<dynamic>> executeDelete({
     required String path,
     dynamic data,
@@ -151,7 +144,7 @@ abstract class NetworkBoundResourceBase {
     final isThereConnection = await _connectivityService.isThereConnection();
 
     if (!isThereConnection) {
-      return await _onNoConnection(data, path, HttpMethod.delete.name);
+      return _onNoConnection(data, path, HttpMethod.delete.name);
     }
 
     final response = await _httpProxyImpl.instance().delete(
@@ -166,9 +159,6 @@ abstract class NetworkBoundResourceBase {
   }
 
   /// Make a PATCH request
-  ///
-  /// [tableName] is the name of table where the data will be stored if there
-  /// is no internet connection to be synchronized later
   Future<Response<dynamic>> executePatch({
     required String path,
     dynamic data,
@@ -181,7 +171,7 @@ abstract class NetworkBoundResourceBase {
     final isThereConnection = await _connectivityService.isThereConnection();
 
     if (!isThereConnection) {
-      return await _onNoConnection(data, path, HttpMethod.patch.name);
+      return _onNoConnection(data, path, HttpMethod.patch.name);
     }
 
     final response = await _httpProxyImpl.instance().patch(
@@ -250,7 +240,7 @@ abstract class NetworkBoundResourceBase {
     );
   }
 
-  /// Save data in database when the user tries to make and HTTP request but
+  /// Save data in database when the user tries to make and http request but
   /// the device isn't internet connection.
   Future<Response<dynamic>> _onNoConnection(
     data,

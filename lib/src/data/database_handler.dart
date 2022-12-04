@@ -6,8 +6,10 @@ import 'package:sembast/sembast_io.dart';
 /// Handle DB operations, like save, find data and so on.
 class DataBaseHandler {
   /// Save a Map into database
-  Future<void> saveLocalData(Map<String, dynamic> data, String tableName,
-      {bool shouldReplaceAll = false}) async {
+  Future<void> saveLocalData(
+    Map<String, dynamic> data,
+    String tableName,
+  ) async {
     final db = await getDatabase();
 
     final store = intMapStoreFactory.store(tableName);
@@ -25,7 +27,7 @@ class DataBaseHandler {
 
     final entities = <dynamic>[];
 
-    for (var element in result) {
+    for (final element in result) {
       entities.add(element.value);
     }
 
@@ -38,7 +40,7 @@ class DataBaseHandler {
 
     final store = intMapStoreFactory.store(tableName);
 
-    store.drop(db);
+    await store.drop(db);
   }
 
   /// Instance and get the Database

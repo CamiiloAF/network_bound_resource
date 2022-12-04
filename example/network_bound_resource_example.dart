@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 // ignore: depend_on_referenced_packages
 import 'package:flutter/material.dart';
 import 'package:network_bound_resource/src/data/network_bound_resource.dart';
@@ -24,7 +26,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+  const MyHomePage({required this.title, super.key});
 
   final String title;
 
@@ -56,9 +58,9 @@ class _MyHomePageState extends State<MyHomePage> {
             ElevatedButton(
                 onPressed: () async {
                   final posts = remoteDataSource.getPosts();
-                  print(posts);
+                  log(posts.toString());
                 },
-                child: Text('Get posts'))
+                child: const Text('Get posts'))
           ],
         ),
       ),
