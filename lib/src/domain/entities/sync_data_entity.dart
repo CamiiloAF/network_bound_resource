@@ -1,3 +1,4 @@
+/// Model to save the data in database
 class SyncDataEntity {
   SyncDataEntity({
     required this.data,

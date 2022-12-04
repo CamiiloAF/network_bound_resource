@@ -6,22 +6,39 @@ import 'connectivity_service.dart';
 import 'database_handler.dart';
 import 'http_proxy_impl.dart';
 
+/// This class automatically decides where it should get the data from,
+/// if you have internet connection the data will be loaded from your backend,
+/// otherwise the data will be loaded from local storage or saved to it if the
+/// request is a POST  PUT or DELETE.
+///
+/// You have to loaded the information at least one time.
 abstract class NetworkBoundResourceBase {
-  final ConnectivityService connectivityService;
-  final HttpProxyImpl httpProxyImpl;
-  final DataBaseHandler dataBaseHandler;
+  final ConnectivityService _connectivityService;
+  final HttpProxyImpl _httpProxyImpl;
+  final DataBaseHandler _dataBaseHandler;
 
   static const _syncDataTableName = 'syncData';
 
-  NetworkBoundResourceBase(
-      this.connectivityService, this.httpProxyImpl, this.dataBaseHandler) {
-    connectivityService.listenDeviceConnectivity((result) async {
-      if (result != ConnectivityResult.none) {
-        await syncData();
-      }
-    });
+  NetworkBoundResourceBase({
+    required ConnectivityService connectivityService,
+    required HttpProxyImpl httpProxyImpl,
+    required DataBaseHandler dataBaseHandler,
+  })  : _connectivityService = connectivityService,
+        _httpProxyImpl = httpProxyImpl,
+        _dataBaseHandler = dataBaseHandler {
+    _connectivityService.listenDeviceConnectivity(
+      (result) async {
+        if (result != ConnectivityResult.none) {
+          await _syncData();
+        }
+      },
+    );
   }
 
+  /// Make a GET request
+  ///
+  /// [tableName] is the name of table where the data will be stored or loaded
+  /// depending of internet connection state
   Future<Response<dynamic>> executeGet({
     required String path,
     required String tableName,
@@ -30,13 +47,13 @@ abstract class NetworkBoundResourceBase {
     CancelToken? cancelToken,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final isThereConnection = await connectivityService.isThereConnection();
+    final isThereConnection = await _connectivityService.isThereConnection();
 
     if (!isThereConnection) {
       return await _getDataFromLocal(tableName, path);
     }
 
-    final response = await httpProxyImpl.instance().get(
+    final response = await _httpProxyImpl.instance().get(
           path,
           cancelToken: cancelToken,
           onReceiveProgress: onReceiveProgress,
@@ -44,30 +61,22 @@ abstract class NetworkBoundResourceBase {
           queryParameters: queryParameters,
         );
 
-    dataBaseHandler.clearTable(tableName);
+    _dataBaseHandler.clearTable(tableName);
 
     if (response.data is Iterable) {
       for (var element in response.data) {
-        dataBaseHandler.saveLocalData(element, tableName);
+        _dataBaseHandler.saveLocalData(element, tableName);
       }
     } else {
-      dataBaseHandler.saveLocalData(response.data, tableName);
+      _dataBaseHandler.saveLocalData(response.data, tableName);
     }
     return response;
   }
 
-  Future<Response<dynamic>> _getDataFromLocal(
-      String tableName, String path) async {
-    final localData = await dataBaseHandler.getLocalData(tableName);
-
-    final dataToResponse = localData.length == 1 ? localData[0] : localData;
-
-    return Response(
-      requestOptions: RequestOptions(path: path),
-      data: dataToResponse,
-    );
-  }
-
+  /// Make a POST request
+  ///
+  /// [tableName] is the name of table where the data will be stored if there
+  /// is no internet connection to be synchronized later
   Future<Response<dynamic>> executePost({
     required String path,
     dynamic data,
@@ -77,13 +86,13 @@ abstract class NetworkBoundResourceBase {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final isThereConnection = await connectivityService.isThereConnection();
+    final isThereConnection = await _connectivityService.isThereConnection();
 
     if (!isThereConnection) {
       _onNoConnection(data, path, HttpMethod.post.name);
     }
 
-    final response = await httpProxyImpl.instance().post(
+    final response = await _httpProxyImpl.instance().post(
           path,
           data: data,
           cancelToken: cancelToken,
@@ -96,6 +105,10 @@ abstract class NetworkBoundResourceBase {
     return response;
   }
 
+  /// Make a PUT request
+  ///
+  /// [tableName] is the name of table where the data will be stored if there
+  /// is no internet connection to be synchronized later
   Future<Response<dynamic>> executePut({
     required String path,
     dynamic data,
@@ -105,13 +118,13 @@ abstract class NetworkBoundResourceBase {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final isThereConnection = await connectivityService.isThereConnection();
+    final isThereConnection = await _connectivityService.isThereConnection();
 
     if (!isThereConnection) {
       return await _onNoConnection(data, path, HttpMethod.put.name);
     }
 
-    final response = await httpProxyImpl.instance().put(
+    final response = await _httpProxyImpl.instance().put(
           path,
           data: data,
           cancelToken: cancelToken,
@@ -124,6 +137,10 @@ abstract class NetworkBoundResourceBase {
     return response;
   }
 
+  /// Make a DELETE request
+  ///
+  /// [tableName] is the name of table where the data will be stored if there
+  /// is no internet connection to be synchronized later
   Future<Response<dynamic>> executeDelete({
     required String path,
     dynamic data,
@@ -131,13 +148,13 @@ abstract class NetworkBoundResourceBase {
     Options? options,
     CancelToken? cancelToken,
   }) async {
-    final isThereConnection = await connectivityService.isThereConnection();
+    final isThereConnection = await _connectivityService.isThereConnection();
 
     if (!isThereConnection) {
       return await _onNoConnection(data, path, HttpMethod.delete.name);
     }
 
-    final response = await httpProxyImpl.instance().delete(
+    final response = await _httpProxyImpl.instance().delete(
           path,
           data: data,
           cancelToken: cancelToken,
@@ -148,6 +165,10 @@ abstract class NetworkBoundResourceBase {
     return response;
   }
 
+  /// Make a PATCH request
+  ///
+  /// [tableName] is the name of table where the data will be stored if there
+  /// is no internet connection to be synchronized later
   Future<Response<dynamic>> executePatch({
     required String path,
     dynamic data,
@@ -157,13 +178,13 @@ abstract class NetworkBoundResourceBase {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final isThereConnection = await connectivityService.isThereConnection();
+    final isThereConnection = await _connectivityService.isThereConnection();
 
     if (!isThereConnection) {
       return await _onNoConnection(data, path, HttpMethod.patch.name);
     }
 
-    final response = await httpProxyImpl.instance().patch(
+    final response = await _httpProxyImpl.instance().patch(
           path,
           data: data,
           cancelToken: cancelToken,
@@ -176,8 +197,11 @@ abstract class NetworkBoundResourceBase {
     return response;
   }
 
-  Future<void> syncData() async {
-    final data = await dataBaseHandler.getLocalData(_syncDataTableName);
+  /// Sync all local data when the device regains internet connection
+  ///
+  /// This action is executed automatically when the device connects to the internet
+  Future<void> _syncData() async {
+    final data = await _dataBaseHandler.getLocalData(_syncDataTableName);
     for (final element in data) {
       final elementToBeSync = SyncDataEntity.fromJson(element);
 
@@ -208,11 +232,31 @@ abstract class NetworkBoundResourceBase {
       }
     }
 
-    await dataBaseHandler.clearTable(_syncDataTableName);
+    await _dataBaseHandler.clearTable(_syncDataTableName);
   }
 
+  /// Load data from database table.
+  Future<Response<dynamic>> _getDataFromLocal(
+    String tableName,
+    String path,
+  ) async {
+    final localData = await _dataBaseHandler.getLocalData(tableName);
+
+    final dataToResponse = localData.length == 1 ? localData[0] : localData;
+
+    return Response(
+      requestOptions: RequestOptions(path: path),
+      data: dataToResponse,
+    );
+  }
+
+  /// Save data in database when the user tries to make and HTTP request but
+  /// the device isn't internet connection.
   Future<Response<dynamic>> _onNoConnection(
-      data, String path, String httpMethod) async {
+    data,
+    String path,
+    String httpMethod,
+  ) async {
     final syncDataEntity = SyncDataEntity(
       data: data,
       path: path,
@@ -225,8 +269,11 @@ abstract class NetworkBoundResourceBase {
     );
   }
 
+  /// Save a [SyncDataEntity] in the database
   Future<void> _saveDataToBeSync(SyncDataEntity syncDataEntity) async {
-    await dataBaseHandler.saveLocalData(
-        syncDataEntity.toJson(), _syncDataTableName);
+    await _dataBaseHandler.saveLocalData(
+      syncDataEntity.toJson(),
+      _syncDataTableName,
+    );
   }
 }

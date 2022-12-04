@@ -1,3 +1,4 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 
 import 'connectivity_service.dart';
@@ -8,11 +9,10 @@ import 'network_bound_resource_base.dart';
 class NetworkBoundResource extends NetworkBoundResourceBase {
   NetworkBoundResource(String baseUrl, {List<Interceptor>? interceptors})
       : super(
-          ConnectivityService(),
-          HttpProxyImpl(
-            baseUrl,
-            interceptors: interceptors,
+          connectivityService: ConnectivityService(
+            connectivity: Connectivity(),
           ),
-          DataBaseHandler(),
+          httpProxyImpl: HttpProxyImpl(baseUrl, interceptors: interceptors),
+          dataBaseHandler: DataBaseHandler(),
         );
 }

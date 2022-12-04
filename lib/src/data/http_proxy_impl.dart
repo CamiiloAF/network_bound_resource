@@ -2,6 +2,11 @@ import 'package:dio/dio.dart';
 
 import 'http_proxy_repository.dart';
 
+/// Set up client HTTP to make HTTP requests
+///
+/// You can use this class to make an HTTP request that does not require
+/// synchronization
+/// [HttpProxyImpl().instance().get(...)]
 class HttpProxyImpl extends HttpProxyInterface {
   late Dio _http;
   final String baseUrl;

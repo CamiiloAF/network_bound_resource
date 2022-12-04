@@ -1,3 +1,4 @@
+/// All HTTP methods supported by library
 enum HttpMethod {
   get,
   post,
@@ -6,7 +7,9 @@ enum HttpMethod {
   delete,
 }
 
+/// HttpMethod extensions
 extension HttpMethodExtension on HttpMethod {
+  /// Get a String with the http method
   String get name {
     switch (this) {
       case HttpMethod.get:
