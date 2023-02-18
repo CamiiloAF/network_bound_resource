@@ -1,10 +1,10 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 
-import 'connectivity_service.dart';
-import 'database_handler.dart';
-import 'http_proxy_impl.dart';
-import 'network_bound_resource_base.dart';
+import '../data/connectivity_service.dart';
+import '../data/database_handler.dart';
+import '../data/http_proxy_impl.dart';
+import '../data/network_bound_resource_base.dart';
 
 class NetworkBoundResource extends NetworkBoundResourceBase {
   NetworkBoundResource(String baseUrl, {List<Interceptor>? interceptors})
