@@ -31,7 +31,7 @@ abstract class NetworkBoundResourceBase {
     _connectivityService.listenDeviceConnectivity(
       (result) async {
         if (result != ConnectivityResult.none) {
-          await _syncData();
+          await syncData();
         }
       },
     );
@@ -41,10 +41,15 @@ abstract class NetworkBoundResourceBase {
   ///
   /// [tableName] is the name of table where the data will be stored or loaded
   /// depending of internet connection state
+  ///
+  /// If you only need to get 1 item and not a list,
+  /// when the device isn't connect to internet,
+  /// you have to send true on [getFromLocalAsAList]
   Future<Response<dynamic>> executeGet({
     required String path,
     required String tableName,
     Map<String, dynamic>? queryParameters,
+    bool getFromLocalAsAList = false,
     Options? options,
     CancelToken? cancelToken,
     ProgressCallback? onReceiveProgress,
@@ -52,7 +57,11 @@ abstract class NetworkBoundResourceBase {
     final isThereConnection = await _connectivityService.isThereConnection();
 
     if (!isThereConnection) {
-      return _getDataFromLocal(tableName, path);
+      return _getDataFromLocal(
+        tableName,
+        path,
+        getFromLocalAsAList: getFromLocalAsAList,
+      );
     }
 
     final response = await _httpProxyImpl.instance().get(
@@ -190,7 +199,7 @@ abstract class NetworkBoundResourceBase {
   /// Sync all local data when the device regains internet connection
   ///
   /// This action is executed automatically when the device connects to the internet
-  Future<void> _syncData() async {
+  Future<void> syncData() async {
     final data = await _dataBaseHandler.getLocalData(_syncDataTableName);
     for (final element in data) {
       final elementToBeSync = SyncDataEntity.fromJson(element);
@@ -226,13 +235,13 @@ abstract class NetworkBoundResourceBase {
   }
 
   /// Load data from database table.
-  Future<Response<dynamic>> _getDataFromLocal(
-    String tableName,
-    String path,
-  ) async {
+  Future<Response<dynamic>> _getDataFromLocal(String tableName, String path,
+      {required bool getFromLocalAsAList}) async {
     final localData = await _dataBaseHandler.getLocalData(tableName);
 
-    final dataToResponse = localData.length == 1 ? localData[0] : localData;
+    final dataToResponse = localData.length == 1 && !getFromLocalAsAList
+        ? localData[0]
+        : localData;
 
     return Response(
       requestOptions: RequestOptions(path: path),

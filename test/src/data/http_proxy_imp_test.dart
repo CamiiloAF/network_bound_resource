@@ -1,98 +1,34 @@
-import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:mockito/annotations.dart';
-import 'package:mockito/mockito.dart';
-import 'package:network_bound_resource/src/data/connectivity_service.dart';
+import 'package:dio/dio.dart';
+import 'package:network_bound_resource/src/data/http_proxy_impl.dart';
+import 'package:network_bound_resource/src/data/http_proxy_repository.dart';
 import 'package:test/test.dart';
 
-import 'connectivity_service_test.mocks.dart';
-
-@GenerateMocks([Connectivity])
 void main() {
-  late ConnectivityService connectivityService;
-  late Connectivity connectivity;
+  HttpProxyInterface httpProxy;
 
-  setUp(() {
-    connectivity = MockConnectivity();
-    connectivityService = ConnectivityService(connectivity: connectivity);
-  });
+  const baseUrl = 'https://test/api';
 
-  group('isThereConnection', () {
+  group('instance', () {
     test(
-        'isThereConnection should return true when ConnectivityResult is "wifi"',
+        'instance should return a Dio instance with baseUrl and empty interceptors when method is invoke',
         () async {
-      when(connectivity.checkConnectivity())
-          .thenAnswer((_) async => ConnectivityResult.wifi);
+      httpProxy = HttpProxyImpl(baseUrl);
 
-      final isThereConnection = await connectivityService.isThereConnection();
+      final dio = httpProxy.instance();
 
-      expect(isThereConnection, isTrue);
+      expect(dio.options.baseUrl, baseUrl);
+      expect(dio.interceptors.isEmpty, isTrue);
     });
-  });
 
-  test(
-      'isThereConnection should return true when ConnectivityResult is "mobile"',
-      () async {
-    when(connectivity.checkConnectivity())
-        .thenAnswer((_) async => ConnectivityResult.mobile);
+    test(
+        'instance should return a Dio instance with baseUrl and interceptors when method is invoke',
+        () async {
+      httpProxy = HttpProxyImpl(baseUrl, interceptors: [Interceptor()]);
 
-    final isThereConnection = await connectivityService.isThereConnection();
+      final dio = httpProxy.instance();
 
-    expect(isThereConnection, isTrue);
-  });
-
-  test(
-      'isThereConnection should return true when ConnectivityResult is "ethernet"',
-      () async {
-    when(connectivity.checkConnectivity())
-        .thenAnswer((_) async => ConnectivityResult.ethernet);
-
-    final isThereConnection = await connectivityService.isThereConnection();
-
-    expect(isThereConnection, isTrue);
-  });
-
-  test('isThereConnection should return true when ConnectivityResult is "vpn"',
-      () async {
-    when(connectivity.checkConnectivity())
-        .thenAnswer((_) async => ConnectivityResult.vpn);
-
-    final isThereConnection = await connectivityService.isThereConnection();
-
-    expect(isThereConnection, isTrue);
-  });
-
-  test(
-      'isThereConnection should return false when ConnectivityResult is "none"',
-      () async {
-    when(connectivity.checkConnectivity())
-        .thenAnswer((_) async => ConnectivityResult.none);
-
-    final isThereConnection = await connectivityService.isThereConnection();
-
-    expect(isThereConnection, isFalse);
-  });
-
-  test(
-      'isThereConnection should return false when ConnectivityResult is "bluetooth"',
-      () async {
-    when(connectivity.checkConnectivity())
-        .thenAnswer((_) async => ConnectivityResult.bluetooth);
-
-    final isThereConnection = await connectivityService.isThereConnection();
-
-    expect(isThereConnection, isFalse);
-  });
-
-  group('listenDeviceConnectivity', () {
-    Future<void> onData(ConnectivityResult result) async {
-      expect(result, ConnectivityResult.ethernet);
-    }
-
-    test('listenDeviceConnectivity should not throw an exception', () {
-      when(connectivity.onConnectivityChanged).thenAnswer((_) async* {
-        yield ConnectivityResult.ethernet;
-      });
-      connectivityService.listenDeviceConnectivity(onData);
+      expect(dio.options.baseUrl, baseUrl);
+      expect(dio.interceptors.isEmpty, isFalse);
     });
   });
 }

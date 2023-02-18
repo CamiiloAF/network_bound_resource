@@ -3,4 +3,4 @@ library network_bound_resource;
 
 export 'package:dio/dio.dart';
 
-export 'src/data/network_bound_resource.dart';
+export 'src/domain/network_bound_resource.dart';

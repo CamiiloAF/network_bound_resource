@@ -1,4 +1,4 @@
-import 'package:network_bound_resource/src/data/network_bound_resource.dart';
+import 'package:network_bound_resource/src/domain/network_bound_resource.dart';
 
 import '../domain/post_entity.dart';
 

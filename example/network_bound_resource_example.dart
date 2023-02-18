@@ -2,7 +2,7 @@ import 'dart:developer';
 
 // ignore: depend_on_referenced_packages
 import 'package:flutter/material.dart';
-import 'package:network_bound_resource/src/data/network_bound_resource.dart';
+import 'package:network_bound_resource/src/domain/network_bound_resource.dart';
 
 import 'data/remote_data_source.dart';
 

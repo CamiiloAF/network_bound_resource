@@ -21,6 +21,7 @@ class ConnectivityService {
   Future<bool> isThereConnection() async {
     final connectivity = await _connectivity.checkConnectivity();
 
-    return connectivity != ConnectivityResult.none;
+    return connectivity != ConnectivityResult.none &&
+        connectivity != ConnectivityResult.bluetooth;
   }
 }
