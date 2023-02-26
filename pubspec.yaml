@@ -1,6 +1,6 @@
 name: network_bound_resource
 description: A package to handle offline http request easily
-version: 1.0.0
+version: 1.1.0-dev.1
 homepage: https://github.com/CamiiloAF/network_bound_resource
 
 environment:

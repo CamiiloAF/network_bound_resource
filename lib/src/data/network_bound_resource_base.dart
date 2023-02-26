@@ -37,6 +37,10 @@ abstract class NetworkBoundResourceBase {
     );
   }
 
+  /// Returns true if the device is connected to internet
+  Future<bool> isThereConnection() async =>
+      _connectivityService.isThereConnection();
+
   /// Make a GET request
   ///
   /// [tableName] is the name of table where the data will be stored or loaded
@@ -72,7 +76,7 @@ abstract class NetworkBoundResourceBase {
           queryParameters: queryParameters,
         );
 
-    await _dataBaseHandler.clearTable(tableName);
+    await clearTable(tableName);
 
     if (response.data is Iterable) {
       for (final element in response.data) {
@@ -93,10 +97,11 @@ abstract class NetworkBoundResourceBase {
     CancelToken? cancelToken,
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
+    bool syncDataIfNoConnection = true,
   }) async {
     final isThereConnection = await _connectivityService.isThereConnection();
 
-    if (!isThereConnection) {
+    if (!isThereConnection && syncDataIfNoConnection) {
       return _onNoConnection(data, path, HttpMethod.post.name);
     }
 
@@ -122,10 +127,11 @@ abstract class NetworkBoundResourceBase {
     CancelToken? cancelToken,
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
+    bool syncDataIfNoConnection = true,
   }) async {
     final isThereConnection = await _connectivityService.isThereConnection();
 
-    if (!isThereConnection) {
+    if (!isThereConnection && syncDataIfNoConnection) {
       return _onNoConnection(data, path, HttpMethod.put.name);
     }
 
@@ -149,10 +155,11 @@ abstract class NetworkBoundResourceBase {
     Map<String, dynamic>? queryParameters,
     Options? options,
     CancelToken? cancelToken,
+    bool syncDataIfNoConnection = true,
   }) async {
     final isThereConnection = await _connectivityService.isThereConnection();
 
-    if (!isThereConnection) {
+    if (!isThereConnection && syncDataIfNoConnection) {
       return _onNoConnection(data, path, HttpMethod.delete.name);
     }
 
@@ -176,10 +183,11 @@ abstract class NetworkBoundResourceBase {
     CancelToken? cancelToken,
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
+    bool syncDataIfNoConnection = true,
   }) async {
     final isThereConnection = await _connectivityService.isThereConnection();
 
-    if (!isThereConnection) {
+    if (!isThereConnection && syncDataIfNoConnection) {
       return _onNoConnection(data, path, HttpMethod.patch.name);
     }
 
@@ -231,7 +239,7 @@ abstract class NetworkBoundResourceBase {
       }
     }
 
-    await _dataBaseHandler.clearTable(_syncDataTableName);
+    await clearTable(_syncDataTableName);
   }
 
   /// Load data from database table.
@@ -270,9 +278,22 @@ abstract class NetworkBoundResourceBase {
 
   /// Save a [SyncDataEntity] in the database
   Future<void> _saveDataToBeSync(SyncDataEntity syncDataEntity) async {
-    await _dataBaseHandler.saveLocalData(
-      syncDataEntity.toJson(),
+    await saveLocalData(
       _syncDataTableName,
+      syncDataEntity.toJson(),
     );
+  }
+
+  /// Save data in local db
+  Future<void> saveLocalData(
+    String tableName,
+    Map<String, dynamic> data,
+  ) async {
+    await _dataBaseHandler.saveLocalData(data, tableName);
+  }
+
+  /// Clear a table on local db
+  Future<void> clearTable(String tableName) async {
+    await _dataBaseHandler.clearTable(tableName);
   }
 }
