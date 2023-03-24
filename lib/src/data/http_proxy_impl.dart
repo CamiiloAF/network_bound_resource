@@ -15,9 +15,8 @@ class HttpProxyImpl extends HttpProxyInterface {
   HttpProxyImpl(this.baseUrl, {this.interceptors}) {
     _http = Dio()
       ..interceptors.addAll(interceptors ?? [])
-      ..options.connectTimeout = 40000
-      ..options.receiveTimeout = 40000
-      ..options.sendTimeout = 3000
+      ..options.connectTimeout = const Duration(seconds: 40)
+      ..options.receiveTimeout = const Duration(seconds: 40)
       ..options.baseUrl = baseUrl;
   }
 

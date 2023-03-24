@@ -1,9 +1,11 @@
-<!-- 
-Handle offline http request easily 
--->
+## Description
+This is a package to handle online and offline http requests. This package decides whether to load data locally or from the server, also this package helps your app to save data offline and sync later when the device has an internet connection.
 
-If you want to save a request as GET, POST, PUT, DELETE or PATCH, and sync the data when
-there isn't internet connection, this package is for you!
+You can make GET, POST, PUT, DELETE, or PATCH, and sync the data when
+there isn't internet connection.
+
+## Known issues
+- You can't make an offline request if you send a `MultipartFile.fromFile`. You have to send `syncDataIfNoConnection: false` in the method parameters.
 
 ## Contributing
 

@@ -296,4 +296,9 @@ abstract class NetworkBoundResourceBase {
   Future<void> clearTable(String tableName) async {
     await _dataBaseHandler.clearTable(tableName);
   }
+
+  /// Get all data from a table of local db
+  Future<List<dynamic>> getDataFromLocal(String tableName) async {
+    return _dataBaseHandler.getLocalData(tableName);
+  }
 }

@@ -12,23 +12,23 @@ void main() {
     test(
         'instance should return a Dio instance with baseUrl and empty interceptors when method is invoke',
         () async {
-      httpProxy = HttpProxyImpl(baseUrl);
+      httpProxy = HttpProxyImpl(baseUrl, interceptors: []);
 
       final dio = httpProxy.instance();
 
       expect(dio.options.baseUrl, baseUrl);
-      expect(dio.interceptors.isEmpty, isTrue);
+      expect(dio.interceptors.length, 1);
     });
 
     test(
         'instance should return a Dio instance with baseUrl and interceptors when method is invoke',
         () async {
-      httpProxy = HttpProxyImpl(baseUrl, interceptors: [Interceptor()]);
+      httpProxy = HttpProxyImpl(baseUrl, interceptors: [const Interceptor()]);
 
       final dio = httpProxy.instance();
 
       expect(dio.options.baseUrl, baseUrl);
-      expect(dio.interceptors.isEmpty, isFalse);
+      expect(dio.interceptors.length, 2);
     });
   });
 }

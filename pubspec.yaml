@@ -1,20 +1,25 @@
 name: network_bound_resource
-description: A package to handle offline http request easily
-version: 1.1.0-dev.1
+description: A package to handle online and offline http requests. This package helps your app to save data offline and sync later when the device has an internet connection
+version: 1.1.0
 homepage: https://github.com/CamiiloAF/network_bound_resource
 
 environment:
-  sdk: '>=2.18.5 <3.0.0'
+  sdk: ">=2.17.0 <4.0.0"
+  flutter: ">=3.0.0"
 
 dependencies:
+  flutter:
+    sdk: flutter
   sembast: ^3.3.1
   path: ^1.8.2
   path_provider: ^2.0.11
-  connectivity_plus: ^3.0.2
-  dio: ^4.0.6
+  connectivity_plus: ^3.0.3
+  dio: ^5.0.3
 
 dev_dependencies:
+  flutter_test:
+    sdk: flutter
   lints: ^2.0.1
-  test: ^1.23.1
-  dart_code_metrics: ^5.1.0
+  dart_code_metrics: ^4.9.1
+  test: ^1.5.1
   mocktail: ^0.3.0
